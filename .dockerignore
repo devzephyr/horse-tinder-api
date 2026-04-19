@@ -1,0 +1,17 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+.env
+.env.*
+tests/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+*.db
+*.sqlite3
+.git/
+.DS_Store
+docker-compose.yml
