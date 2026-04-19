@@ -8,13 +8,16 @@ class Settings(BaseSettings):
 
     @property
     def async_database_url(self) -> str:
-        """Ensure the URL uses the asyncpg driver (Neon gives postgresql://)."""
+        """Ensure the URL uses the asyncpg driver, stripping libpq-only params."""
         url = self.DATABASE_URL
         if url.startswith("postgresql://"):
             url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
-        # asyncpg uses 'ssl' not 'sslmode' (which is a libpq parameter)
-        url = url.replace("sslmode=", "ssl=")
-        return url
+        # Strip query params (sslmode, channel_binding, etc. are libpq-only)
+        base = url.split("?")[0]
+        # Re-add SSL if the original URL requested it
+        if "sslmode=" in url or "ssl=" in url:
+            base += "?ssl=require"
+        return base
 
     ACCESS_TOKEN_SECRET: str = "dev-access-secret-change-me-in-production-min-32-bytes"
     REFRESH_TOKEN_SECRET: str = "dev-refresh-secret-change-me-in-production-min-32-bytes"
