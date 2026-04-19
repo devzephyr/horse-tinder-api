@@ -1,6 +1,6 @@
 FROM python:3.12-slim
 
-WORKDIR /app
+WORKDIR /project
 
 # Install system dependencies for asyncpg and bcrypt
 RUN apt-get update && \
@@ -8,11 +8,11 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml .
-RUN pip install --no-cache-dir .
-
+COPY app/ app/
 COPY alembic.ini .
 COPY alembic/ alembic/
-COPY app/ app/
+
+RUN pip install --no-cache-dir .
 
 EXPOSE 8000
 
