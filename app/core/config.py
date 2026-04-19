@@ -12,6 +12,8 @@ class Settings(BaseSettings):
         url = self.DATABASE_URL
         if url.startswith("postgresql://"):
             url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        # asyncpg uses 'ssl' not 'sslmode' (which is a libpq parameter)
+        url = url.replace("sslmode=", "ssl=")
         return url
 
     ACCESS_TOKEN_SECRET: str = "dev-access-secret-change-me-in-production-min-32-bytes"
