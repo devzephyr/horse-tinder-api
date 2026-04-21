@@ -49,6 +49,9 @@ async def login(
     if user and user.is_locked:
         if user.locked_until and user.locked_until > datetime.now(timezone.utc):
             _log_attempt(db, email, ip_address, success=False)
+            # Persist the attempt log before raising — get_db rolls back on
+            # exception, which would otherwise drop it.
+            await db.commit()
             raise RateLimitException("Account is temporarily locked. Try again later.")
         else:
             user.is_locked = False
@@ -64,6 +67,9 @@ async def login(
                     minutes=LOCKOUT_DURATION_MINUTES
                 )
         _log_attempt(db, email, ip_address, success=False)
+        # Persist counter increment / lockout state before raising so the
+        # outer get_db rollback does not discard it.
+        await db.commit()
         raise UnauthorizedException("Invalid email or password")
 
     user.failed_login_attempts = 0

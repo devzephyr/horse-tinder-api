@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import NotFoundException
@@ -33,8 +33,9 @@ async def deactivate_user(db: AsyncSession, user: User) -> None:
 async def admin_list_users(
     db: AsyncSession, offset: int, limit: int
 ) -> tuple[list[User], int]:
-    total_result = await db.execute(select(User))
-    total = len(total_result.scalars().all())
+    total = (
+        await db.execute(select(func.count()).select_from(User))
+    ).scalar_one()
 
     result = await db.execute(
         select(User).order_by(User.created_at.desc()).offset(offset).limit(limit)

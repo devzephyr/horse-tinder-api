@@ -19,6 +19,10 @@ class Settings(BaseSettings):
             base += "?ssl=require"
         return base
 
+    # The secret defaults below are intentional placeholders for local dev
+    # and the public demo. Real deployments set these via environment
+    # variables (.env is gitignored); if either default is ever observed
+    # in a production environment, is_production must fail-fast elsewhere.
     ACCESS_TOKEN_SECRET: str = "dev-access-secret-change-me-in-production-min-32-bytes"
     REFRESH_TOKEN_SECRET: str = "dev-refresh-secret-change-me-in-production-min-32-bytes"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15

@@ -67,6 +67,20 @@ async def validate_image_url(url: str) -> tuple[bool, str]:
     if not hostname:
         return False, "No hostname in URL."
 
+    # If the hostname is an IP literal (IPv4 dotted-quad or bracketed IPv6),
+    # urlparse strips the brackets and gives us the raw address. Check it
+    # against BLOCKED_NETWORKS directly — do not rely on the domain allowlist
+    # to incidentally reject it, since the allowlist only covers DNS names
+    # and would give a misleading "not in allowlist" reason.
+    try:
+        ipaddress.ip_address(hostname)
+    except ValueError:
+        pass
+    else:
+        if _is_ip_blocked(hostname):
+            return False, "URL points to a blocked IP address."
+        return False, "Direct IP URLs are not allowed; use an allowlisted domain."
+
     if not _is_domain_allowed(hostname):
         return False, f"Domain '{hostname}' is not in the allowlist."
 
